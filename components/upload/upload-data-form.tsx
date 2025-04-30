@@ -1,58 +1,73 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload, FileSpreadsheet, X } from "lucide-react"
-import { useState } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Upload, FileSpreadsheet, X } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { useUploadedData } from "@/context/uploadedDataContext";
 
 export function UploadDataForm() {
-  const [isDragging, setIsDragging] = useState(false)
-  const [file, setFile] = useState<File | null>(null)
-  const [dataType, setDataType] = useState<string>("")
-  const [isUploading, setIsUploading] = useState(false)
-  const { toast } = useToast()
+  const { file, setFile } = useUploadedData(); // setFile is already defined here
+  const [dataType, setDataType] = useState<string>("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false); // Add this line
+  const { toast } = useToast();
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
+    e.preventDefault();
+    setIsDragging(false);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const droppedFile = e.dataTransfer.files[0]
+      const droppedFile = e.dataTransfer.files[0];
       if (
-        droppedFile.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+        droppedFile.type ===
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
         droppedFile.type === "application/vnd.ms-excel"
       ) {
-        setFile(droppedFile)
+        setFile(droppedFile); // setFile is used here
       } else {
         toast({
           title: "Invalid file type",
           description: "Please upload an Excel file (.xlsx or .xls)",
           variant: "destructive",
-        })
+        });
       }
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0])
+      setFile(e.target.files[0]); // setFile is used here
     }
-  }
+  };
 
   const handleUpload = () => {
     if (!file) {
@@ -60,8 +75,8 @@ export function UploadDataForm() {
         title: "No file selected",
         description: "Please select a file to upload",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (!dataType) {
@@ -69,32 +84,36 @@ export function UploadDataForm() {
         title: "Data type not selected",
         description: "Please select the type of data you are uploading",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsUploading(true)
+    setIsUploading(true);
 
     // Simulate upload process
     setTimeout(() => {
-      setIsUploading(false)
+      setIsUploading(false);
       toast({
         title: "Upload successful",
         description: `${file.name} has been uploaded and processed.`,
-      })
-    }, 2000)
-  }
+      });
+    }, 2000);
+  };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Upload Data</CardTitle>
-        <CardDescription>Upload your Excel files for analysis and visualization</CardDescription>
+        <CardDescription>
+          Upload your Excel files for analysis and visualization
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div
           className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center h-[140px] transition-colors ${
-            isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/20"
+            isDragging
+              ? "border-primary bg-primary/5"
+              : "border-muted-foreground/20"
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -104,12 +123,19 @@ export function UploadDataForm() {
             <div className="flex flex-col items-center gap-2">
               <div className="flex items-center gap-2">
                 <FileSpreadsheet className="h-8 w-8 text-primary" />
-                <Button variant="ghost" size="icon" className="h-6 w-6 rounded-full" onClick={() => setFile(null)}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 rounded-full"
+                  onClick={() => setFile(null)}
+                >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
               <p className="text-sm font-medium">{file.name}</p>
-              <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(2)} KB</p>
+              <p className="text-xs text-muted-foreground">
+                {(file.size / 1024).toFixed(2)} KB
+              </p>
             </div>
           ) : (
             <>
@@ -119,7 +145,13 @@ export function UploadDataForm() {
               </p>
             </>
           )}
-          <input type="file" className="hidden" id="file-upload" accept=".xlsx,.xls" onChange={handleFileChange} />
+          <input
+            type="file"
+            className="hidden"
+            id="file-upload"
+            accept=".xlsx,.xls"
+            onChange={handleFileChange}
+          />
         </div>
 
         <div className="space-y-2">
@@ -133,7 +165,9 @@ export function UploadDataForm() {
               <SelectItem value="cost">Cost & Pricing Data</SelectItem>
               <SelectItem value="transit">Transit Time Data</SelectItem>
               <SelectItem value="customs">Customs Clearance Data</SelectItem>
-              <SelectItem value="utilization">Capacity Utilization Data</SelectItem>
+              <SelectItem value="utilization">
+                Capacity Utilization Data
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -150,22 +184,27 @@ export function UploadDataForm() {
         <Button
           variant="outline"
           onClick={() => {
-            setFile(null)
-            setDataType("")
+            setFile(null);
+            setDataType("");
           }}
         >
           Clear
         </Button>
         <div className="flex space-x-2">
-          <Button onClick={() => document.getElementById("file-upload")?.click()} variant="outline">
+          <Button
+            onClick={() => document.getElementById("file-upload")?.click()}
+            variant="outline"
+          >
             Browse Files
           </Button>
-          <Button onClick={handleUpload} disabled={!file || !dataType || isUploading}>
+          <Button
+            onClick={handleUpload}
+            disabled={!file || !dataType || isUploading}
+          >
             {isUploading ? "Uploading..." : "Upload & Process"}
           </Button>
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }
-
